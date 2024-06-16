@@ -171,7 +171,7 @@ firehabitat$uci<-firehabitat$fit+(1.96*firehabitat$se)
 dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
   par(mar=c(4,4,1,1))
   plot(1:3,firehabitat$fit,type="p", ylim=c(min(0),max(firehabitat$uci)),xlim=c(min(0.5),max(3.5)),xlab="Fire Habitat Catergory",ylab="Species Richness",las=1,cex=3,pch=19,xaxt="n")
-  axis(side=1,at=1:3,labels=c("UB R.forest","B R.forest","B Sclero"))
+  axis(side=1,at=1:3,labels=c("UBR","BR","BS"))
     arrows(x0=c(1,2,3), y0=firehabitat$lci,x1=c(1,2,3), y1=firehabitat$uci,angle=90,length=0.1, code=3, lwd=2)
 
 #PCA----
@@ -734,19 +734,19 @@ plot(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_caterg
 lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],lwd=2,lty=2)
 lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],lwd=2,lty=2)
 mtext(side=1,line=2,'Distance To Rainforest Boundry (m)',cex=0.9)
-mtext(side=2,line=2,"Probability Of Active Behaviour",cex=0.9)
+mtext(side=2,line=2,"Probability Of Activity",cex=0.9)
 
 plot(  x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$fit[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,ylab=" ",xlab=" ",type="l",main="Burnt Rainforest",cex.main=1.1,xlim=c(min(move.melpred4$Dis_to_rainforest_boundry),max(move.melpred4$Dis_to_rainforest_boundry)))
 lines(x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,lty=2)
 lines(x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,lty=2)
 mtext(side=1,line=2,'Distance To Rainforest Boundry (m)',cex=0.9)
-mtext(side=2,line=2,"Probability Of Active Behaviour",cex=0.9)
+mtext(side=2,line=2,"Probability Of Activity",cex=0.9)
 
 plot(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$fit[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,ylab=" ",xlab=" ",type="l",main="Burnt Sclerophyll",cex.main=1.1,ylim=c(0,1))
 lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,lty=2)
 lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,lty=2)
 mtext(side=1,line=2,'Distance To Rainforest Boundry (m)',cex=0.9)
-mtext(side=2,line=2,"Probability Of Active Behaviour",cex=0.9)
+mtext(side=2,line=2,"Probability Of Activity",cex=0.9)
 
 ##Bushrat----
 
@@ -840,11 +840,11 @@ move.fuspred8$uci<-invlogit(move.fuspred8$uci.link)
 dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,1,1),mfrow=c(2,2))
 
-plot(1:4,move.fuspred6$fit,type="p", ylim=c(min(0,min(move.fuspred6$lci)),max(1,max(move.fuspred6$uci))),xlab="Understory",ylab="Probability of Active Behaviour",las=1,cex=2,pch=19,xaxt="n")
+plot(1:4,move.fuspred6$fit,type="p", ylim=c(min(0,min(move.fuspred6$lci)),max(1,max(move.fuspred6$uci))),xlab="Understory",ylab="Probability of Activity",las=1,cex=2,pch=19,xaxt="n")
 axis(side=1,at=1:4,labels=c(0,1,2,3))
 arrows(x0=1:4, y0=move.fuspred6$lci,x1=1:4, y1=move.fuspred6$uci,angle=90,length=0.1, code=3, lwd=2)
 
-plot(1:3,move.fuspred8$fit,type="p", ylim=c(min(0,min(move.fuspred8$lci)),max(1,max(move.fuspred8$uci))),xlab="Fire Habitat Catergory",ylab="Probability of Active Behaviour",las=1,cex=2,pch=19,xaxt="n")
+plot(1:3,move.fuspred8$fit,type="p", ylim=c(min(0,min(move.fuspred8$lci)),max(1,max(move.fuspred8$uci))),xlab="Fire Habitat Catergory",ylab="Probability of Activity",las=1,cex=2,pch=19,xaxt="n")
 axis(side=1,at=1:3,labels=c("UBR","BR","BS"))
 arrows(x0=1:3, y0=move.fuspred8$lci,x1=1:3, y1=move.fuspred8$uci,angle=90,length=0.1, code=3, lwd=2)
 
@@ -949,9 +949,9 @@ plot(x=move.stigpred6$Elevation,y=move.stigpred6$fit,type="l",ylim=c(0,1),lwd=2,
 lines(x=move.stigpred6$Elevation,y=move.stigpred6$lci,lwd=2,lty=2)
 lines(x=move.stigpred6$Elevation,y=move.stigpred6$uci,lwd=2,lty=2)
 mtext(side=1,line=2,'Elevation (m)',cex=0.9)
-mtext(side=2,line=2,"Probability Of Active Behaviour",cex=0.9)
+mtext(side=2,line=2,"Probability Of Activity",cex=0.9)
 
-plot(1:2,move.stigpred8$fit,type="p", ylim=c(min(0,min(move.stigpred8$lci)),max(1,max(move.stigpred8$uci))),xlim=c(min(0.5),max(2.5)),xlab="Fire Habitat Catergory",ylab="Probability of Active Behaviour",las=1,cex=2,pch=19,xaxt="n")
+plot(1:2,move.stigpred8$fit,type="p", ylim=c(min(0,min(move.stigpred8$lci)),max(1,max(move.stigpred8$uci))),xlim=c(min(0.5),max(2.5)),xlab="Fire Habitat Catergory",ylab="Probability of Activity",las=1,cex=2,pch=19,xaxt="n")
 axis(side=1,at=1:2,labels=c('UB Rainforest','B Rainforest'))
 arrows(x0=1:2, y0=move.stigpred8$lci,x1=1:2, y1=move.stigpred8$uci,angle=90,length=0.1, code=3, lwd=2)
 
