@@ -700,6 +700,9 @@ unique(behave$Identification)
 move.ante<-behave2[c(which(behave2$Identification=="Antechinus_stuartii")),]
 dim(move.ante)
 
+move.ban<-behave2[c(which(behave2$Identification=="Perameles_nasuta")),]
+dim(move.ban)
+
 move.sus<-behave2[c(which(behave2$Identification=="Sus_scrofa")),]
 dim(move.sus)
 
@@ -708,7 +711,6 @@ dim(move.phas)
 
 move.can<-behave2[c(which(behave2$Identification=="Trichosurus_caninus")),]
 dim(move.can)
-
 
 #Melomys----
 
