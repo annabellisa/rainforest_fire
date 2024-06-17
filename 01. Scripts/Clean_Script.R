@@ -13,7 +13,12 @@ library("arm")
 library('glmmADMB')
 library("plotrix")
 library(("R2admb"))
-
+library("iNext")
+library("grid()")
+library("gridExtra")
+library("tidyverse")
+library("ggplot2")
+library("DescTools")
 
 #DATA EXPLORATION----
 
@@ -224,7 +229,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
   biplot(pca2,xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1,ylim=c(-0.3,0.6))
 
-##comp 1 modeling----
+##Comp 1 modeling----
   
   head(pcadata,5);dim(pcadata)
   
@@ -260,7 +265,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   
   aictab(comp1final)
   
-##comp2 modelling----
+##Comp2 modelling----
   
   summary(comp2null<-lm(pca.comp2~1,data=pcadata))
   
@@ -304,7 +309,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   midstory$lci<-midstory$fit-(1.96*midstory$se)
   midstory$uci<-midstory$fit+(1.96*midstory$se)
   
-  ###component 2 graphing----
+  ###Component 2 graphing----
   
   dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
   par(mar=c(4,4,1,1))
@@ -358,7 +363,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
   ggiNEXT(iN_results, type=2, se=TRUE, facet.var="Order.q", color.var="Assemblage", grey=FALSE)  
   
-  #Coverage-Based R/E Curve----
+##Coverage-Based R/E Curve----
   
   dev.new(height=7,width=12,dpi=80,pointsize=14,noRStudioGD = T)
   p2 <- ggiNEXT(iN_results, type=3, se=TRUE, facet.var="Order.q", color.var="Assemblage", grey=FALSE) +
@@ -378,7 +383,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   
   
   
-#SPECIES PRESENCE/ABSENCE DATA----
+#PROBABILITY OF HABITAT USE----
 
 
 propzero<-data.frame(species=names(apply(pcadata[,which(colnames(pcadata)=="A.sti"):which(colnames(pcadata)=="T.can")],2,FUN = function(x)table(x==0)[2]/sum(table(x==0)))),propzero=apply(pcadata[,which(colnames(pcadata)=="A.sti"):which(colnames(pcadata)=="T.can")],2,FUN = function(x)table(x==0)[2]/sum(table(x==0))))
@@ -501,7 +506,7 @@ ante.6$se<-invlogit(ante.6$se.link)
 ante.6$lci<-invlogit(ante.6$lci.link)
 ante.6$uci<-invlogit(ante.6$uci.link)
 
-##Bushrat----
+##Rattus----
 
 bush<-glm(ifelse(singledata[,which(colnames(singledata)=='bushrat')]==0,0,1)~Fire_habitat_catergory,data=singledata,family=binomial)
 
@@ -528,7 +533,7 @@ bush.5$se<-invlogit(bush.5$se.link)
 bush.5$lci<-invlogit(bush.5$lci.link)
 bush.5$uci<-invlogit(bush.5$uci.link)
 
-##Thylogale stigmatica----
+##Stigmatica----
 
 sti<-glm(ifelse(singledata[,which(colnames(singledata)=='stigmatica')]==0,0,1)~Fire_habitat_catergory,data=singledata,family=binomial)
 
@@ -555,7 +560,7 @@ sti.5$se<-invlogit(sti.5$se.link)
 sti.5$lci<-invlogit(sti.5$lci.link)
 sti.5$uci<-invlogit(sti.5$uci.link)
 
-##Thylogale thetis----
+##Thetis----
 
 the<-glm(ifelse(singledata[,which(colnames(singledata)=='thetis')]==0,0,1)~Fire_habitat_catergory,data=singledata,family=binomial)
 
@@ -609,7 +614,8 @@ pos.5$se<-invlogit(pos.5$se.link)
 pos.5$lci<-invlogit(pos.5$lci.link)
 pos.5$uci<-invlogit(pos.5$uci.link)
 
-###Graphing----
+###Other Species Plot----
+
 
 dev.new(height=21,width=14,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(3,2),mgp=c(2.5,1,0)) 
@@ -645,53 +651,73 @@ arrows(x0=1:3, y0=pos.5$lci,x1=1:3, y1=pos.5$uci,angle=90,length=0.1, code=3, lw
 text(3,0.9,labels=paste("p=",posp,sep=""))
 mtext("(e)",3,0.4,F,0)
 
-#MOVEMENT----
+#PROBABILITY OF MOVEMENT BEHAVIOUR----
 
-site<-rawsite
-site[,c(2,3,6,7,8,9)]<-NULL
-names(site)<-c("Site","Elevation","Fire_habitat_catergory","Dis_to_road","Dis_to_path","Understory","Canopy_Cover","Midstory","Surrounding_Unburnt","Surrounding_Low","Surrounding_Moderate","Surrounding_High","Surrounding_Extreme","Surrounding_Burn", "Dis_to_rainforest_boundry", "Habitat")
+mammals2<-dplyr::filter(nofalse,Bird_Mammal=="Mammal")
+mammals2<-dplyr::filter(mammals2,Taxinomic_Rank=="Species")
+
+head(nofalse)
+table(mammals2$Behaviour,mammals2$Identification)
+
+behave <- mammals2
+behave$Behaviour <- ifelse(behave$Behaviour=="Foraging_Eating"|behave$Behaviour=="Grooming"|behave$Behaviour=="Alert"|behave$Behaviour=="No_Behaviour",0,1)
+# stationary behaviour == 0
+# movement behaviour == 1
+
+x <- 1
+behavelist<- list()
+for (i in unique(behave$Animal_ID)) {
+  behavelist[x] <- ifelse(length(unique(behave[behave$Animal_ID == i,]$Behaviour))==1,TRUE,FALSE)
+  x <- x + 1
+}
+
+length(behavelist[behavelist==TRUE])
+length(behavelist[behavelist==FALSE])
+
+behave1 <- data.frame(Animal_ID = unique(behave$Animal_ID),active = NA)
+x <- 1
+for (i in unique(behave$Animal_ID)) {
+  behave1$active[x] <- ifelse(length(behave[behave$Animal_ID == i,]$Behaviour)==1, yes = behave[behave$Animal_ID == i,]$Behaviour, no = Mode(behave[behave$Animal_ID == i,]$Behaviour)[1])
+  x <- x+1
+}
+
+sum(is.na(behave1$active)) #total of 15 animals out of 925 had NA (i.e had equal movement and stationary behaviour)
+#these 15 where excluded from analysis
+
+dim(behave1)
+behave1<-na.omit(behave1)
+dim(behave1)
+
+behave2<-merge(behave1,behave)
+behave2<- behave2 %>% dplyr::distinct(Animal_ID, .keep_all = TRUE)
+
+head(behave2);dim(behave2)
+
+unique(behave$Identification)
+
+##Species must have 46 observations (double the number of sites in study) to be modeled for movement behaviour 
+
+move.ante<-behave2[c(which(behave2$Identification=="Antechinus_stuartii")),]
+dim(move.ante)
+
+move.sus<-behave2[c(which(behave2$Identification=="Sus_scrofa")),]
+dim(move.sus)
+
+move.phas<-behave2[c(which(behave2$Identification=="Phascolarctos_cinereus")),]
+dim(move.phas)
+
+move.can<-behave2[c(which(behave2$Identification=="Trichosurus_caninus")),]
+dim(move.can)
 
 
-table(mammals$Behaviour,mammals$Identification)
+#Melomys----
 
-head(mammals,3);dim(mammals)
-head(site,3);dim(site)
-
-list(
-  melomys = table(move.mel2$Fire_habitat_catergory[move.mel2$active==1])/table(move.mel2$Fire_habitat_catergory),
-  rattus = table(move.fus2$Fire_habitat_catergory[move.fus2$active==1])/table(move.fus2$Fire_habitat_catergory),
-  stigmatica = table(move.stig3$Fire_habitat_catergory[move.stig3$active==1])/table(move.stig3$Fire_habitat_catergory),
-  thylogale = table(move.the2$Fire_habitat_catergory[move.the2$active==1])/table(move.the2$Fire_habitat_catergory),
-  possum = table(move.can2$Fire_habitat_catergory[move.can2$active==1])/table(move.can2$Fire_habitat_catergory)
-)
-
-
-
-##melomys data----
-
-move.mel<-mammals[c(which(mammals$Identification=="Melomys_cervinipes")),]
-
-move.mel<-move.mel[c(which(move.mel$Behaviour==c("Foraging_Eating","No_")),which(move.mel$Behaviour==c("Walking_Running"))),]
-
-move.mel1<-data.frame(
-  inactive=ifelse(move.mel$Behaviour==c("Foraging_Eating"),1,0),
-  active=ifelse(move.mel$Behaviour== c("Walking_Running"),1,0),
-  Site=move.mel$Site)
-
-move.mel2<-merge(x=move.mel1,y=site)
-
-head(move.mel2,3);dim(move.mel2)
-
-table(move.mel2$inactive==move.mel2$active)
-
-str(move.mel2)
+move.mel<-behave2[c(which(behave2$Identification=="Melomys_cervinipes")),]
+move.mel2<-merge(x=move.mel,y=rawsite)
 move.mel2$Fire_habitat_catergory<-factor(move.mel2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
-unique(move.mel2$Fire_habitat_catergory)
+head(move.mel2);dim(move.mel2)
 
-table(move.mel2$Fire_habitat_catergory[move.mel2$active==1])/table(move.mel2$Fire_habitat_catergory)
-
-
-###melomys modeling----
+##Modeling----
 
 modm.null<-glmer(active~1+(1|Site),data=move.mel2,family=binomial)
 
@@ -714,44 +740,33 @@ modm.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),
 AICc(modm.4a);AICc(modm.4b)
 
 modm.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.mel2,family=binomial)
-modm.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.mel2,family=binomial)
-AICc(modm.5a);AICc(modm.5b)
+modm.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.mel2,family=binomial) #model excluded due to not converging correctly
+AICc(modm.5a)
 
 modm.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.mel2,family=binomial)
-modm.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.mel2,family=binomial)
-AICc(modm.6a);AICc(modm.6b)
+modm.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.mel2,family=binomial) #model excluded due to not converging correctly
+AICc(modm.6a)
 
-modm.list<-c('null'=modm.null,'FHC'=modm.FHC,'elevation'=modm.1a,"road"=modm.2a,'path'=modm.3a,'boundary'=modm.4b,'midstory'=modm.5a,'understory'=modm.6b)
+modm.list<-c('null'=modm.null,'FHC'=modm.FHC,'elevation'=modm.1b,"road"=modm.2a,'path'=modm.3a,'boundary'=modm.4b,'midstory'=modm.5a,'understory'=modm.6a)
 
 aictab(modm.list)
+#top model == Null
+#second ranked == elevation, within 2 Delta AICc of null 
 
-anova(modm.FHC,modm.4b)
+anova(modm.FHC,modm.1a)
 
-summary(modm.4b)
+head(move.mel2);dim(move.mel2)
 
-###melomys predictions----
+##Predictions----
 
-modm.4b
-class(modm.4b)
-min(move.mel2$Dis_to_rainforest_boundry)
-max(move.mel2$Dis_to_rainforest_boundry)
-unique(move.mel2$Site)
+min(rawsite$Elevation)
+max(rawsite$Elevation)
 
-move.melpred<-data.frame(Fire_habitat_catergory=factor(rep(c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll'),rep(50,3)), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Dis_to_rainforest_boundry=seq(min(move.mel2$Dis_to_rainforest_boundry),max(move.mel2$Dis_to_rainforest_boundry),length.out=50))
+move.melpred<-data.frame(Fire_habitat_catergory=factor(rep(c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll'),rep(50,3)), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Elevation = seq(min(move.mel2$Elevation),max(move.mel2$Elevation),length.out=50))
 
-summary(modm.4b)
-anova(modm.4b,modm.null)
+summary(modm.1b)
 
-
-summary(model)$coefficients
-summary(modm.4b)$coefficients
-
-move.mel2$Site<-as.factor(move.mel2$Site)
-summary(modm.4b)
-
-
-
-move.melpred3<-predict(object=model,newdata=move.melpred,se.fit =TRUE,type="link")
+move.melpred3<-predictSE(mod=modm.1b,newdata=move.melpred,se.fit =TRUE,type="link")
 head(move.melpred3)
 
 move.melpred4<-data.frame(move.melpred,fit.link=move.melpred3$fit,se.link=move.melpred3$se.fit)
@@ -763,121 +778,43 @@ move.melpred4$se<-invlogit(move.melpred4$se.link)
 move.melpred4$lci<-invlogit(move.melpred4$lci.link)
 move.melpred4$uci<-invlogit(move.melpred4$uci.link)
 
-head(move.melpred4)
-
-move.melpred5<-move.melpred4
-
-
-
-move.melpred3<-predictSE(mod=modm.4b,newdata=move.melpred,se.fit =TRUE,type="link")
-head(move.melpred3)
-
-move.melpred4<-data.frame(move.melpred,fit.link=move.melpred3$fit,se.link=move.melpred3$se.fit)
-move.melpred4$lci.link<-move.melpred4$fit.link-(1.96*move.melpred4$se.link)
-move.melpred4$uci.link<-move.melpred4$fit.link+(1.96*move.melpred4$se.link)
-
-move.melpred4$fit<-invlogit(move.melpred4$fit.link)
-move.melpred4$se<-invlogit(move.melpred4$se.link)
-move.melpred4$lci<-invlogit(move.melpred4$lci.link)
-move.melpred4$uci<-invlogit(move.melpred4$uci.link)
-
-
-head(move.melpred4[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest",])
-
-
-###melomys graphing----
-
-head(move.melpred4[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest",])
-head(move.melpred4[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest",])
-head(move.melpred4[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll",])
-
-las=1,cex=2,pch=19,xaxt="n"
-ylim=c(min(move.melpred4$lci),max(move.melpred4$uci))
-
-move.melpred4[77:100,7:10]
-?replace
-move.melfit<-replace(x=move.melpred4$fit,list=77:100,values = NA)
-move.melse<-replace(x=move.melpred4$se,list=77:100,values = NA)
-move.mellci<-replace(x=move.melpred4$lci,list=77:100,values = NA)
-move.meluci<-replace(x=move.melpred4$uci,list=77:100,values = NA)
-
-move.melpred4$fit<-move.melfit
-move.melpred4$se<-move.melse
-move.melpred4$lci<-move.mellci
-move.melpred4$uci<-move.meluci
-
-
+##Plot ----
 
 dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,1,1),mfrow=c(2,2))
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
 
-plot(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],y=move.melpred4$fit[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],type="l",lwd=2,ylab=" ",xlab="",main="Unburnt Rainforest",cex.main=1.2,ylim=c(0,1),las=1)
-lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],lwd=2,lty=2)
-lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Unburnt_Rainforest"],lwd=2,lty=2)
-mtext(side=1,line=2,'Distance To Rainforest Boundry(m)',cex=0.9)
-mtext(side=2,line=2.3,"Probability Of Movement",cex=0.9)
-mtext("(a)",3,0.1,F,0)
-
-plot(  x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$fit[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,ylab=" ",xlab=" ",type="l",main="Burnt Rainforest",cex.main=1.2,xlim=c(min(move.melpred4$Dis_to_rainforest_boundry),max(move.melpred4$Dis_to_rainforest_boundry)),las=1)
-lines(x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,lty=2)
-lines(x=subset(move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),y=subset(move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Burnt_Rainforest"],move.melpred4$Dis_to_rainforest<213),lwd=2,lty=2)
-mtext(side=1,line=2,at=160,'Distance To Rainforest Boundry(m)',cex=0.9)
-mtext(side=2,line=2.3,"Probability Of Movement",cex=0.9)
-mtext("(b)",3,0.1,F,0)
-
-plot(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$fit[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,ylab=" ",xlab=" ",type="l",main="Burnt Sclerophyll",cex.main=1.2,ylim=c(0,1),las=1)
-lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,lty=2)
-lines(x=move.melpred4$Dis_to_rainforest_boundry[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory=="Burnt_Sclerophyll"],lwd=2,lty=2)
-mtext(side=1,line=2,'Distance To Rainforest Boundry(m)',cex=0.9)
-mtext(side=2,line=2.3,"Probability Of Movement",cex=0.9)
-mtext("(c)",3,0.1,F,0)
-mtext("(d)",3,0.1,F,550)
-
-head(move.mel2)
-
-tapply(move.mel2$Dis_to_rainforest_boundry,move.mel2$Fire_habitat_catergory,FUN=summary)
-
-##rattus data----
-
-table(mammals$Behaviour,mammals$Identification)
+plot(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.melpred4$fit [move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Unburnt Rainforest",las=1,xlim = c(min(move.mel2$Elevation),max(move.mel2$Elevation)))
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],lwd=2,lty=2)
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory == "Unburnt_Rainforest"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(a)",side = 3,line = 0.2,F,at = 520)
 
 
-move.fus<-mammals[c(which(mammals$Identification=="Rattus_fuscipes")),]
+plot(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.melpred4$fit [move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Burnt Rainforest",las=1,xlim = c(min(move.mel2$Elevation),max(move.mel2$Elevation)))
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],lwd=2,lty=2)
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory == "Burnt_Rainforest"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(b)",3,0.2,F,520)
 
-dim(move.fus)
-head(rawdata,30)
+plot(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.melpred4$fit [move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Burnt Sclerophyll",las=1,xlim = c(min(move.mel2$Elevation),max(move.mel2$Elevation)))
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.melpred4$lci[move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],lwd=2,lty=2)
+lines(x=move.melpred4$Elevation[move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.melpred4$uci[move.melpred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(c)",3,0.2,F,520)
 
-move.fus<-move.fus[c(
-  which(move.fus$Behaviour==c("Foraging_Eating")),
-  which(move.fus$Behaviour==c("Walking_Running")),
-  which(move.fus$Behaviour==c("Grooming")),
-  which(move.fus$Behaviour==c("Hopping_Jumping")),
-  which(move.fus$Behaviour==c("Alert"))
-),]
 
-dim(move.fus)
+#Rattus----
 
-move.fus1<-data.frame(
-  inactive=ifelse(move.fus$Behaviour=="Foraging_Eating"|move.fus$Behaviour=="Grooming",1,0),
-  active=ifelse(move.fus$Behaviour=="Walking_Running"| move.fus$Behaviour== "Hopping_Jumping"| move.fus$Behaviour== "Alert",1,0),
-  Site=move.fus$Site)
-
-dim(move.fus1)
-sum(move.fus1$active)
-sum(move.fus1$inactive)
-
-move.fus2<-merge(x=move.fus1,y=site)
-
+move.fus<-behave2[c(which(behave2$Identification=="Rattus_fuscipes")),]
+move.fus2<-merge(x=move.fus,y=rawsite)
 move.fus2$Fire_habitat_catergory<-factor(move.fus2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
-
+unique(move.fus2$Fire_habitat_catergory)
 head(move.fus2);dim(move.fus2)
 
-trat<-table(move.fus2$active,move.fus2$Fire_habitat_catergory)
-trat[2,]/sum(trat[1,],trat[2,])
-
-table(move.fus2$Fire_habitat_catergory[move.fus2$active==1])/table(move.fus2$Fire_habitat_catergory)
-
-###rattus modeling----
+##Modeling----
 
 modr.null<-glmer(active~1+(1|Site),data=move.fus2,family=binomial)
 
@@ -897,144 +834,84 @@ modr.3b<-glmer(active~Fire_habitat_catergory*Dis_to_path+(1|Site),data=move.fus2
 AICc(modr.3a);AICc(modr.3b)
 
 modr.4a<-glmer(active~Fire_habitat_catergory+Dis_to_rainforest_boundry+(1|Site),data=move.fus2,family=binomial)
-modr.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.fus2,family=binomial)
+modr.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.fus2,family=binomial) #model excluded as it didn't converge properly
 AICc(modr.4a);AICc(modr.4b)
 
 modr.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.fus2,family=binomial)
-modr.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.fus2,family=binomial)
+modr.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.fus2,family=binomial) #model excluded as it didn't converge properly
 AICc(modr.5a);AICc(modr.5b)
 
 modr.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.fus2,family=binomial)
-modr.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.fus2,family=binomial)
+modr.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.fus2,family=binomial) #model excluded as it didn't converge properly
 AICc(modr.6a);AICc(modr.6b)
 
-modr.list<-c('null'=modr.null,'FHC'=modr.FHC,'elevation'=modr.1a,"road"=modr.2a,'path'=modr.3a,'boundary'=modr.4a,'midstory'=modr.5a,'understory'=modr.6a)
+modr.list<-c('null'=modr.null,'FHC'=modr.FHC,'elevation'=modr.1b,"road"=modr.2a,'path'=modr.3b,'boundary'=modr.4a,'midstory'=modr.5a,'understory'=modr.6a)
 
 aictab(modr.list)
+#top model == Elevation
+#second ranked == dis to road, not within 2 Delta AICc of null
 
 anova(modr.FHC,modr.6a)
+summary(modr.FHC)
 
-summary(modr.6a)
+##Predictions ----
 
-###rattus predictions----
-
-move.fus2$Understory<-mapping[move.fus2$Understory]
-
-modr.6a
-
-head(move.fus2,3);dim(move.fus2)
-
-unique(move.fus2$Fire_habitat_catergory)
-
-move.fuspredunder<-data.frame(Fire_habitat_catergory=factor(rep('Unburnt_Rainforest',4), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Understory=c(0,1,2,3))
-
-table(move.fus2$Fire_habitat_catergory)
-
-move.fuspredFHC<-data.frame(Fire_habitat_catergory=factor(c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll'), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Understory=c(2,2,2))
-
-table(move.fus2$Fire_habitat_catergory,move.fus2$Understory)
+min(rawsite$Elevation)
+max(rawsite$Elevation)
 
 
-move.fuspred5<-predictSE(mod=modr.6a,newdata=move.fuspredunder,se.fit =TRUE,type="link")
+move.fuspred<-data.frame(Fire_habitat_catergory=factor(rep(c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll'),rep(50,3)), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Elevation = seq(min(move.fus2$Elevation),max(move.fus2$Elevation),length.out=50))
 
-move.fuspred6<-data.frame(move.fuspredunder,fit.link=move.fuspred5$fit,se.link=move.fuspred5$se.fit)
-move.fuspred6$lci.link<-move.fuspred6$fit.link-(1.96*move.fuspred6$se.link)
-move.fuspred6$uci.link<-move.fuspred6$fit.link+(1.96*move.fuspred6$se.link)
+summary(modr.1b)
 
-move.fuspred6$fit<-invlogit(move.fuspred6$fit.link)
-move.fuspred6$se<-invlogit(move.fuspred6$se.link)
-move.fuspred6$lci<-invlogit(move.fuspred6$lci.link)
-move.fuspred6$uci<-invlogit(move.fuspred6$uci.link)
+move.fuspred3<-predictSE(mod=modr.1b,newdata=move.fuspred,se.fit =TRUE,type="link")
+head(move.fuspred3)
 
-move.fuspred7<-predictSE(mod=modr.6a,newdata=move.fuspredFHC,se.fit =TRUE,type="link")
+move.fuspred4<-data.frame(move.fuspred,fit.link=move.fuspred3$fit,se.link=move.fuspred3$se.fit)
+move.fuspred4$lci.link<-move.fuspred4$fit.link-(1.96*move.fuspred4$se.link)
+move.fuspred4$uci.link<-move.fuspred4$fit.link+(1.96*move.fuspred4$se.link)
 
-move.fuspred8<-data.frame(move.fuspredFHC,fit.link=move.fuspred7$fit,se.link=move.fuspred7$se.fit)
-move.fuspred8$lci.link<-move.fuspred8$fit.link-(1.96*move.fuspred8$se.link)
-move.fuspred8$uci.link<-move.fuspred8$fit.link+(1.96*move.fuspred8$se.link)
+move.fuspred4$fit<-invlogit(move.fuspred4$fit.link)
+move.fuspred4$se<-invlogit(move.fuspred4$se.link)
+move.fuspred4$lci<-invlogit(move.fuspred4$lci.link)
+move.fuspred4$uci<-invlogit(move.fuspred4$uci.link)
 
-move.fuspred8$fit<-invlogit(move.fuspred8$fit.link)
-move.fuspred8$se<-invlogit(move.fuspred8$se.link)
-move.fuspred8$lci<-invlogit(move.fuspred8$lci.link)
-move.fuspred8$uci<-invlogit(move.fuspred8$uci.link)
-
-
-###rattus graphing----
-
+##Plot ----
 
 dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,1,1),mfrow=c(2,2))
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
 
-plot(1:4,move.fuspred6$fit,type="p", ylim=c(min(0,min(move.fuspred6$lci)),max(1,max(move.fuspred6$uci))),xlab="Understory",ylab="Probability of Movement",las=1,cex=2,pch=19,xaxt="n")
-axis(side=1,at=1:4,labels=c(0,1,2,3))
-arrows(x0=1:4, y0=move.fuspred6$lci,x1=1:4, y1=move.fuspred6$uci,angle=90,length=0.1, code=3, lwd=2)
-mtext("(a)",3,0.2,F,0.5)
-
-plot(1:3,move.fuspred8$fit,type="p", ylim=c(min(0,min(move.fuspred8$lci)),max(1,max(move.fuspred8$uci))),xlab="Fire Habitat Catergory",ylab="Probability of Movement",las=1,cex=2,pch=19,xaxt="n")
-axis(side=1,at=1:3,labels=c("UBR","BR","BS"))
-arrows(x0=1:3, y0=move.fuspred8$lci,x1=1:3, y1=move.fuspred8$uci,angle=90,length=0.1, code=3, lwd=2)
-mtext("(b)",3,0.2,F,0.5)
-
-##stigmatica data----
-
-table(mammals$Behaviour,mammals$Identification)
+plot(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.fuspred4$fit [move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Unburnt Rainforest",las=1,xlim = c(min(move.fus2$Elevation),max(move.fus2$Elevation)))
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.fuspred4$lci[move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],lwd=2,lty=2)
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],y=move.fuspred4$uci[move.fuspred4$Fire_habitat_catergory == "Unburnt_Rainforest"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(a)",side = 3,line = 0.2,F,at = 520)
 
 
-move.stig<-mammals[c(which(mammals$Identification=="Thylogale_stigmatica")),]
+plot(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.fuspred4$fit [move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Burnt Rainforest",las=1,xlim = c(min(move.fus2$Elevation),max(move.fus2$Elevation)))
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.fuspred4$lci[move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],lwd=2,lty=2)
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],y=move.fuspred4$uci[move.fuspred4$Fire_habitat_catergory == "Burnt_Rainforest"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(b)",3,0.2,F,520)
 
-dim(move.stig)
-
-unique(move.stig$Behaviour)
-
-move.stig<-move.stig[c(
-  which(move.stig$Behaviour==c("Foraging_Eating")),
-  which(move.stig$Behaviour==c("Hopping_Jumping")),
-  which(move.stig$Behaviour==c("Alert"))
-),]
-
-dim(move.stig)
-
-move.stig1<-data.frame(
-  inactive=ifelse(move.stig$Behaviour=="Foraging_Eating",1,0),
-  active=ifelse(move.stig$Behaviour== "Hopping_Jumping"| move.stig$Behaviour== "Alert",1,0),
-  Site=move.stig$Site)
+plot(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.fuspred4$fit [move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="Burnt Sclerophyll",las=1,xlim = c(min(move.fus2$Elevation),max(move.fus2$Elevation)))
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.fuspred4$lci[move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],lwd=2,lty=2)
+lines(x=move.fuspred4$Elevation[move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],y=move.fuspred4$uci[move.fuspred4$Fire_habitat_catergory == "Burnt_Sclerophyll"],lwd=2,lty=2)
+mtext(side=1,line=2.4,'Elevation (m)',cex=1)
+mtext(side=2,line=2.3,"Probability Of Movement",cex=1)
+mtext("(c)",3,0.2,F,520)
 
 
-dim(move.stig1)
-sum(move.stig1$active)
-sum(move.stig1$inactive)
+#Stigmatica----
 
-move.stig2<-merge(x=move.stig1,y=site)
+move.stig<-behave2[c(which(behave2$Identification=="Thylogale_stigmatica")),]
+move.stig2<-merge(x=move.stig,y=rawsite)
+move.stig2$Fire_habitat_catergory<-factor(move.stig2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
+head(move.stig2);dim(move.stig2)
 
-head(move.stig2,3);dim(move.stig2)
-
-move.stig2$Fire_habitat_catergory<-factor(move.stig2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest","Burnt_Sclerophyll" ))
-
-tstig<-table(move.stig2$active,move.stig2$Fire_habitat_catergory)
-tstig[2,]/sum(tstig[1,],tstig[2,])
-
-tstig2<-table(move.stig2$inactive,move.stig2$Fire_habitat_catergory)
-
-move.stig3<- move.stig2
-
-table(move.stig3$Fire_habitat_catergory[move.stig3$active==1])/table(move.stig3$Fire_habitat_catergory)
-
-move.stig2[which(move.stig2$Fire_habitat_catergory==c("Burnt_Sclerophyll")),]
-
-
-move.stig2<-move.stig2[c(
-  which(move.stig2$Fire_habitat_catergory==c("Unburnt_Rainforest")),
-  which(move.stig2$Fire_habitat_catergory==c("Burnt_Rainforest"))
-),]
-dim(move.stig2)
-str(move.stig2)
-
-levels.FHC<-list("Unburnt_Rainforest","Burnt_Rainforest")
-
-move.stig2$Fire_habitat_catergory<-factor(move.stig2$Fire_habitat_catergory,levels=levels.FHC)
-
-str(move.stig2)
-
-###stigmatica modeling----
+##Modeling----
 
 mods.null<-glmer(active~1+(1|Site),data=move.stig2,family=binomial)
 
@@ -1045,253 +922,78 @@ summary(mods.FHC)
 anova(mods.FHC)
 
 mods.1a<-glmer(active~Fire_habitat_catergory+Elevation+(1|Site),data=move.stig2,family=binomial)
-mods.1b<-glmer(active~Fire_habitat_catergory*Elevation+(1|Site),data=move.stig2,family=binomial)
-AICc(mods.1a);AICc(mods.1b)
+mods.1b<-glmer(active~Fire_habitat_catergory*Elevation+(1|Site),data=move.stig2,family=binomial) #model excluded as it didn't converge properly
+AICc(mods.1a)
 
 mods.2a<-glmer(active~Fire_habitat_catergory+Dis_to_road+(1|Site),data=move.stig2,family=binomial)
-mods.2b<-glmer(active~Fire_habitat_catergory*Dis_to_road+(1|Site),data=move.stig2,family=binomial)
-AICc(mods.2a);AICc(mods.2b)
+mods.2b<-glmer(active~Fire_habitat_catergory*Dis_to_road+(1|Site),data=move.stig2,family=binomial)#model excluded as it didn't converge properly
+AICc(mods.2a)
 
 mods.3a<-glmer(active~Fire_habitat_catergory+Dis_to_path+(1|Site),data=move.stig2,family=binomial)
 mods.3b<-glmer(active~Fire_habitat_catergory*Dis_to_path+(1|Site),data=move.stig2,family=binomial)
 AICc(mods.3a);AICc(mods.3b)
 
 mods.4a<-glmer(active~Fire_habitat_catergory+Dis_to_rainforest_boundry+(1|Site),data=move.stig2,family=binomial)
-mods.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.stig2,family=binomial)
-AICc(mods.4a);AICc(mods.4b)
+mods.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.stig2,family=binomial) #model excluded as it didn't converge properly
+AICc(mods.4a)
 
-mods.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.stig2,family=binomial)
-mods.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.stig2,family=binomial)
-AICc(mods.5a);AICc(mods.5b)
+mods.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.stig2,family=binomial) #model excluded as it didn't converge properly
+mods.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.stig2,family=binomial) #model excluded as it didn't converge properly
 
 mods.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.stig2,family=binomial)
-mods.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.stig2,family=binomial)
-AICc(mods.6a);AICc(mods.6b)
+mods.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.stig2,family=binomial) #model excluded as it didn't converge properly
+AICc(mods.6a)
 
-mods.list<-c('null'=mods.null,'FHC'=mods.FHC,'elevation'=mods.1a,"road"=mods.2a,'path'=mods.3b,'boundary'=mods.4b,'midstory'=mods.5a,'understory'=mods.6b)
+mods.list<-c('null'=mods.null,'FHC'=mods.FHC,'elevation'=mods.1a,"road"=mods.2a,'path'=mods.3a,'boundary'=mods.4a,'understory'=mods.6a)
 
 aictab(mods.list)
+#top ranked model == Null
+#second ranked model is not within 2 delta AICc's from Null
 
 anova(mods.FHC,mods.1a)
 
-summary(mods.1a)
-
 head(move.stig2)
 
-###stigmatica predictions----
+#Thetis----
 
-mods.1a
-
-move.stigpredelv<-data.frame(Fire_habitat_catergory=factor(rep('Unburnt_Rainforest',50), levels=c('Unburnt_Rainforest','Burnt_Rainforest')),Elevation=seq(min(move.stig2$Elevation),max(move.stig2$Elevation),length.out=50))
-
-move.stigpredFHC<-data.frame(Fire_habitat_catergory=factor(c('Unburnt_Rainforest','Burnt_Rainforest'), levels=c('Unburnt_Rainforest','Burnt_Rainforest')),Elevation=mean(move.stig2$Elevation))
-
-head(move.stigpred)
-table(move.stig2$Fire_habitat_catergory)
-
-
-move.stigpred5<-predictSE(mod=mods.1a,newdata=move.stigpredelv,se.fit =TRUE,type="link")
-head(move.stigpred3)
-warnings()
-
-move.stigpred6<-data.frame(move.stigpredelv,fit.link=move.stigpred5$fit,se.link=move.stigpred5$se.fit)
-move.stigpred6$lci.link<-move.stigpred6$fit.link-(1.96*move.stigpred6$se.link)
-move.stigpred6$uci.link<-move.stigpred6$fit.link+(1.96*move.stigpred6$se.link)
-
-move.stigpred6$fit<-invlogit(move.stigpred6$fit.link)
-move.stigpred6$se<-invlogit(move.stigpred6$se.link)
-move.stigpred6$lci<-invlogit(move.stigpred6$lci.link)
-move.stigpred6$uci<-invlogit(move.stigpred6$uci.link)
-
-head(move.stigpred6)
-
-move.stigpred7<-predictSE(mod=mods.1a,newdata=move.stigpredFHC,se.fit =TRUE,type="link")
-head(move.stigpred7)
-
-move.stigpred8<-data.frame(move.stigpredFHC,fit.link=move.stigpred7$fit,se.link=move.stigpred7$se.fit)
-move.stigpred8$lci.link<-move.stigpred8$fit.link-(1.96*move.stigpred8$se.link)
-move.stigpred8$uci.link<-move.stigpred8$fit.link+(1.96*move.stigpred8$se.link)
-
-move.stigpred8$fit<-invlogit(move.stigpred8$fit.link)
-move.stigpred8$se<-invlogit(move.stigpred8$se.link)
-move.stigpred8$lci<-invlogit(move.stigpred8$lci.link)
-move.stigpred8$uci<-invlogit(move.stigpred8$uci.link)
-
-head(move.stigpred8)
-
-
-
-###stigmatica graphing----
-
-head(move.stigpred4[move.stigpred4$Fire_habitat_catergory=="Unburnt_Rainforest",])
-head(move.stigpred4[move.stigpred4$Fire_habitat_catergory=="Burnt_Rainforest",])
-head(move.stigpred4[move.stigpred4$Fire_habitat_catergory=="Burnt_Sclerophyll",])
-
-#Pub quality graph----
-dev.new(height=4,width=8,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,1,1),mfrow=c(1,2))
-
-plot(x=move.stigpred6$Elevation,y=move.stigpred6$fit,type="l",ylim=c(0,1),lwd=2,ylab=" ",xlab=" ",main="",las=1)
-lines(x=move.stigpred6$Elevation,y=move.stigpred6$lci,lwd=2,lty=2)
-lines(x=move.stigpred6$Elevation,y=move.stigpred6$uci,lwd=2,lty=2)
-mtext(side=1,line=2,'Elevation (m)',cex=1.2)
-mtext(side=2,line=2.3,"Probability Of Movement",cex=1.2)
-mtext("(a)",3,0.2,F,765)
-
-plot(1:2,move.stigpred8$fit,type="p", ylim=c(min(0,min(move.stigpred8$lci)),max(1,max(move.stigpred8$uci))),xlim=c(min(0.5),max(2.5)),las=1,cex=2,pch=19,xaxt="n",xlab = "",ylab = "")
-axis(side=1,at=1:2,labels=c('UBR','BR'))
-arrows(x0=1:2, y0=move.stigpred8$lci,x1=1:2, y1=move.stigpred8$uci,angle=90,length=0.1, code=3, lwd=2)
-mtext(side=2,line=2.3,"Probability Of Movement",cex=1.2)
-mtext(side=1,line=2,"Fire Habitat Category",cex=1.2)
-mtext("(b)",side = 3,line = 0.2,outer = F,at = 0.1)
-
-##thylogale data----
-
-table(mammals$Behaviour,mammals$Identification)
-
-
-move.the<-mammals[c(which(mammals$Identification=="Thylogale_thetis")),]
-
-dim(move.the)
-
-unique(move.the$Behaviour)
-
-move.the<-move.the[c(
-  which(move.the$Behaviour==c("Foraging_Eating")),
-  which(move.the$Behaviour==c("Hopping_Jumping")),
-  which(move.the$Behaviour==c("Walking_Running"))
-),]
-
-dim(move.the)
-
-move.the1<-data.frame(
-  inactive=ifelse(move.the$Behaviour=="Foraging_Eating",1,0),
-  active=ifelse(move.the$Behaviour== "Hopping_Jumping"| move.the$Behaviour== "Walking_Running",1,0),
-  Site=move.the$Site)
-
-
-dim(move.the1)
-sum(move.the1$active)
-sum(move.the1$inactive)
-
-move.the2<-merge(x=move.the1,y=site)
-
+move.the<-behave2[c(which(behave2$Identification=="Thylogale_thetis")),]
+move.the2<-merge(x=move.the,y=rawsite)
+move.the2$Fire_habitat_catergory<-factor(move.the2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
 head(move.the2);dim(move.the2)
 
-move.the2$Fire_habitat_catergory<-factor(move.the2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
-
-
-tthe<-table(move.the2$active,move.the2$Fire_habitat_catergory)
-tthe[2,]/sum(tthe[1,],tthe[2,])
-
-table(move.the2$Fire_habitat_catergory[move.the2$active==1])/table(move.the2$Fire_habitat_catergory)
-
-
-###thylogale modeling----
+##Modeling----
 
 modt.null<-glmer(active~1+(1|Site),data=move.the2,family=binomial)
 
 modt.FHC<-glmer(active~Fire_habitat_catergory+(1|Site),data=move.the2,family=binomial)
 
-modt.1a<-glmer(active~Fire_habitat_catergory+Elevation+(1|Site),data=move.the2,family=binomial)
-modt.1b<-glmer(active~Fire_habitat_catergory*Elevation+(1|Site),data=move.the2,family=binomial)
-AICc(modt.1a);AICc(modt.1b)
+modt.1a<-glmer(active~Fire_habitat_catergory+Elevation+(1|Site),data=move.the2,family=binomial)#model excluded as it didn't converge properly
+modt.1b<-glmer(active~Fire_habitat_catergory*Elevation+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
 
 modt.2a<-glmer(active~Fire_habitat_catergory+Dis_to_road+(1|Site),data=move.the2,family=binomial)
-modt.2b<-glmer(active~Fire_habitat_catergory*Dis_to_road+(1|Site),data=move.the2,family=binomial)
-AICc(modt.2a);AICc(modt.2b)
+modt.2b<-glmer(active~Fire_habitat_catergory*Dis_to_road+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
+AICc(modt.2a)
 
 modt.3a<-glmer(active~Fire_habitat_catergory+Dis_to_path+(1|Site),data=move.the2,family=binomial)
-modt.3b<-glmer(active~Fire_habitat_catergory*Dis_to_path+(1|Site),data=move.the2,family=binomial)
-AICc(modt.3a);AICc(modt.3b)
+modt.3b<-glmer(active~Fire_habitat_catergory*Dis_to_path+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
+AICc(modt.3a)
 
 modt.4a<-glmer(active~Fire_habitat_catergory+Dis_to_rainforest_boundry+(1|Site),data=move.the2,family=binomial)
-modt.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.the2,family=binomial)
-AICc(modt.4a);AICc(modt.4b)
+modt.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
+AICc(modt.4a)
 
-modt.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.the2,family=binomial)
-modt.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.the2,family=binomial)
-AICc(modt.5a);AICc(modt.5b)
+modt.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
+modt.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.the2,family=binomial) #model excluded as it didn't converge properly
 
-modt.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.the2,family=binomial)
-modt.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.the2,family=binomial)
-AICc(modt.6a);AICc(modt.6b)
+modt.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.the2,family=binomial)#model excluded as it didn't converge properly
+modt.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.the2,family=binomial)#model excluded as it didn't converge properly
 
-modt.list<-c('null'=modt.null,'FHC'=modt.FHC,'elevation'=modt.1a,"road"=modt.2a,'path'=modt.3a,'boundary'=modt.4a,'midstory'=modt.5a,'understory'=modt.6a)
+modt.list<-c('null'=modt.null,'FHC'=modt.FHC,"road"=modt.2a,'path'=modt.3a,'boundary'=modt.4a)
+#top ranked model == null
+#second rank model is not within 2 delta AICcs of top ranked
 
 aictab(modt.list)
 
-
-##possum data----
-
-table(mammals$Behaviour,mammals$Identification)
-
-
-move.can<-mammals[c(which(mammals$Identification=="Trichosurus_caninus")),]
-
-dim(move.can)
-
-unique(move.can$Behaviour)
-
-move.can<-move.can[c(
-  which(move.can$Behaviour==c("Foraging_Eating")),
-  which(move.can$Behaviour==c("Hopping_Jumping")),
-  which(move.can$Behaviour==c("Walking_Running"))
-),]
-
-dim(move.can)
-
-move.can1<-data.frame(
-  inactive=ifelse(move.can$Behaviour=="Foraging_Eating",1,0),
-  active=ifelse(move.can$Behaviour== "Hopping_Jumping"| move.can$Behaviour== "Walking_Running",1,0),
-  Site=move.can$Site)
-
-
-dim(move.can1)
-sum(move.can1$active)
-sum(move.can1$inactive)
-
-move.can2<-merge(x=move.can1,y=site)
-
-head(move.can2);dim(move.can2)
-
-move.can2$Fire_habitat_catergory<-factor(move.can2$Fire_habitat_catergory,levels=c("Unburnt_Rainforest", "Burnt_Rainforest" ,  "Burnt_Sclerophyll" ))
-
-table(move.can2$Fire_habitat_catergory[move.can2$active==1])/table(move.can2$Fire_habitat_catergory)
-
-###possum modeling----
-
-modp.null<-glmer(active~1+(1|Site),data=move.can2,family=binomial)
-
-modp.FHC<-glmer(active~Fire_habitat_catergory+(1|Site),data=move.can2,family=binomial)
-
-modp.1a<-glmer(active~Fire_habitat_catergory+Elevation+(1|Site),data=move.can2,family=binomial)
-modp.1b<-glmer(active~Fire_habitat_catergory*Elevation+(1|Site),data=move.can2,family=binomial)
-AICc(modp.1a);AICc(modp.1b)
-
-modp.2a<-glmer(active~Fire_habitat_catergory+Dis_to_road+(1|Site),data=move.can2,family=binomial)
-modp.2b<-glmer(active~Fire_habitat_catergory*Dis_to_road+(1|Site),data=move.can2,family=binomial)
-AICc(modp.2a);AICc(modp.2b)
-
-modp.3a<-glmer(active~Fire_habitat_catergory+Dis_to_path+(1|Site),data=move.can2,family=binomial)
-modp.3b<-glmer(active~Fire_habitat_catergory*Dis_to_path+(1|Site),data=move.can2,family=binomial)
-AICc(modp.3a);AICc(modp.3b)
-
-modp.4a<-glmer(active~Fire_habitat_catergory+Dis_to_rainforest_boundry+(1|Site),data=move.can2,family=binomial)
-modp.4b<-glmer(active~Fire_habitat_catergory*Dis_to_rainforest_boundry+(1|Site),data=move.can2,family=binomial)
-AICc(modp.4a);AICc(modp.4b)
-
-modp.5a<-glmer(active~Fire_habitat_catergory+Midstory+(1|Site),data=move.can2,family=binomial)
-modp.5b<-glmer(active~Fire_habitat_catergory*Midstory+(1|Site),data=move.can2,family=binomial)
-AICc(modp.5a);AICc(modp.5b)
-
-modp.6a<-glmer(active~Fire_habitat_catergory+Understory+(1|Site),data=move.can2,family=binomial)
-modp.6b<-glmer(active~Fire_habitat_catergory*Understory+(1|Site),data=move.can2,family=binomial)
-AICc(modp.6a);AICc(modp.6b)
-
-modp.list<-c('null'=modp.null,'FHC'=modp.FHC,'elevation'=modp.1a,"road"=modp.2a,'midstory'=modp.5a,'understory'=modp.6a)
-
-aictab(modp.list)
 
 
 #END OF SCRIPT----
