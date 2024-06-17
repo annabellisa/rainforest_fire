@@ -1,6 +1,8 @@
 # Analysis of rainforest mammal communities following fire 
-
 R scripts and data for analysing rainforest mammal communities following fire 
+
+# Latest Release (Archived)
+[![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/doi/10.5281/zenodo.7321029)
 
 ## Content Description
 
@@ -14,7 +16,7 @@ Rhiannon Bird and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-TBA
+Bird, R.R., Zsoldos, R.R., Jimenez Sandoval, M.V., Watson, S.J. & Smith, A.L. under review. Wildfire in rainforest margins is associated with variation in mammal habitat use and behaviour.
 
 ## License
 
