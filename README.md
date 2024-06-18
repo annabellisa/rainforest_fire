@@ -10,6 +10,8 @@ R scripts and data for analysing rainforest mammal communities following fire
 
 01. Scripts: Scripts for processing and analysis
 
+02. Results: Final results figures
+
 ## Code Authors
 
 Rhiannon Bird and Annabel Smith (unless otherwise stated within script)
