@@ -119,7 +119,7 @@ corrplot::corrplot(cr1,method="color",
 
 #PCA----
 
-##Preparing data----
+##Preparing Data
 
 pcadata<-modelrich
 
@@ -229,7 +229,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
   biplot(pca2,xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1,ylim=c(-0.3,0.6),las = 1)
 
-##Comp 1 modeling----
+##Component 1 Modeling----
   
   head(pcadata,5);dim(pcadata)
   
@@ -265,7 +265,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   
   aictab(comp1final)
   
-##Comp2 modelling----
+##Component 2 Modelling----
   
   summary(comp2null<-lm(pca.comp2~1,data=pcadata))
   
@@ -299,7 +299,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   
   aictab(comp2final)
   
-###Component 2 predictions----
+###Predictions----
 
   predictions1<-data.frame(Fire_habitat_catergory=factor(c(rep(c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll'),4)), levels=c('Unburnt_Rainforest','Burnt_Rainforest','Burnt_Sclerophyll')),Midstory=c(0,0,0,1,1,1,2,2,2,3,3,3))
   
@@ -309,7 +309,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   midstory$lci<-midstory$fit-(1.96*midstory$se)
   midstory$uci<-midstory$fit+(1.96*midstory$se)
   
-  ###Component 2 graphing----
+  ###Plot----
   
   dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
   par(mar=c(4,4,1,1))
@@ -459,7 +459,7 @@ band.5$lci<-invlogit(band.5$lci.link)
 band.5$uci<-invlogit(band.5$uci.link)
 
 
-###Melomys and Bandicoot Figure----
+###Melomys and Bandicoot Plot----
 
 dev.new(height=4,width=8,dpi=70,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,3,3),mfrow=c(1,2))
