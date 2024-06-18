@@ -205,18 +205,18 @@ col.1<-col.1[as.factor(pcadata$Fire_habitat_catergory)]
 
 dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0))
-plot(x=1:length(PoV2),y=PoV2,ylab="Propotion Varience Explained",xlab="Components",type="p")
+plot(x=1:length(PoV2),y=PoV2,ylab="Propotion Varience Explained",xlab="Components",type="p",las=1)
 lines(x=1:length(PoV2),y=PoV2)
 mtext("(a)",3,0.7,F,0)
 mtext("58.17",3,-1,F,2,cex=0.7)
 mtext("37.60",3,-4.1,F,3,cex=0.7)
 
-plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1))
+plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=alpha(col.1,1),las=1)
   legend("topleft",legend=c("Unburnt Rainforest","Burnt Rainforest","Burnt Sclerophyll"),pch=c(15,17,16),pt.cex=2,col=c("grey20","grey40","grey60"))
   mtext("(b)",3,0.4,F,adj=0,at=-140)
-  title(ylab="PC2",adj=0.1,cex=1.2,line=2)
+  title(ylab="PC2",adj=0.1,cex=1.2,line=2.5)
   mtext(expression(italic("Rattus fuscipes")),side=2,adj=1,line=3,font=2,cex=0.7)
-  mtext(expression(italic("Melomys crevinipes")),side=2,adj=0.4,line=2.5,font=2,cex=0.7)
+  mtext(expression(italic("Melomys crevinipes")),side=2,adj=0.5,line=2.5,font=2,cex=0.7)
   par(xpd=T)
   arrows(-150,0,-150,45,length=0.1)
   par(xpd=NA)
@@ -227,7 +227,7 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   par(xpd=NA)
 
   dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
-  biplot(pca2,xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1,ylim=c(-0.3,0.6))
+  biplot(pca2,xlab="Component 1",ylab="Component 2",col=c("grey40","black"),var.axes=T,arrow.len=0.1,ylim=c(-0.3,0.6),las = 1)
 
 ##Comp 1 modeling----
   
@@ -314,7 +314,6 @@ plot(pcadata$pca.comp1,pcadata$pca.comp2,pch=shapes, xlab="",ylab="",cex=2,col=a
   dev.new(height=7,width=7,dpi=80,pointsize=14,noRStudioGD = T)
   par(mar=c(4,4,1,1))
   
-  dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
   plot(1:4,midstory$fit[midstory$Fire_habitat_catergory=="Unburnt_Rainforest"],type="p", ylim=c(min(midstory$lci[midstory$Fire_habitat_catergory=="Unburnt_Rainforest"]),max(midstory$uci[midstory$Fire_habitat_catergory=="Unburnt_Rainforest"])),xlim=c(min(0.5),max(4.5)),xlab="Midstory Index",ylab="Principal Component 2",las=1,cex=3,pch=15,xaxt="n",col="grey20")
   axis(side=1,at=1:4,labels=0:3,xlab="midstory")
   lines(1:4,midstory$fit[midstory$Fire_habitat_catergory=="Unburnt_Rainforest"],col="grey20")
