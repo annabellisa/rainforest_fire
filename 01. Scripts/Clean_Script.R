@@ -107,8 +107,10 @@ cordata1$Fire_habitat_catergory <- as.numeric(cordata1$Fire_habitat_catergory)
 
 
 cr1<-cor(cordata1, method="pearson")
+colnames(cr1) <- c("Elevation","Distance to Highway","Distance to Path","Distance to Rainforest Boundary","Understory","Midstory","Canopy Cover","Fire Habitat Category")
+rownames(cr1) <- c("Elevation","Distance to Highway","Distance to Path","Distance to Rainforest Boundary","Understory","Midstory","Canopy Cover","Fire Habitat Category")
 
-dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+dev.new(height=8,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(1,1,1,1),mfrow=c(1,1),mgp=c(2.5,1,0))
 corrplot::corrplot(cr1,method="color",  
          type="upper", 
