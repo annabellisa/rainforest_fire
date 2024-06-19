@@ -108,6 +108,8 @@ cordata1$Fire_habitat_catergory <- as.numeric(cordata1$Fire_habitat_catergory)
 
 cr1<-cor(cordata1, method="pearson")
 
+dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(1,1,1,1),mfrow=c(1,1),mgp=c(2.5,1,0))
 corrplot::corrplot(cr1,method="color",  
          type="upper", 
          addCoef.col = "black",
