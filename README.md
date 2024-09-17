@@ -2,7 +2,7 @@
 R scripts and data for analysing rainforest mammal communities following fire 
 
 # Latest Release (Archived)
-[![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/doi/10.5281/zenodo.12131487)
+[![DOI](https://zenodo.org/badge/604401015.svg)](https://zenodo.org/records/12131487)
 
 ## Content Description
 
