@@ -18,7 +18,7 @@ Rhiannon Bird and Annabel Smith (unless otherwise stated within script)
 
 ## Manuscript
 
-Bird, R.R., Zsoldos, R.R., Jimenez Sandoval, M.V., Watson, S.J. & Smith, A.L. under review. Wildfire in rainforest margins is associated with variation in mammal diversity and habitat use.
+Bird, R.R., Zsoldos, R.R., Jimenez Sandoval, M.V., Watson, S.J. & Smith, A.L. (2025). Wildfire in rainforest margins is associated with variation in mammal diversity and habitat use. Wildlife Research. 
 
 ## License
 
